@@ -1,18 +1,19 @@
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg') #gia to docker
 import matplotlib.pyplot as plt
 from stable_baselines3 import PPO
 from AI_agent import ProfessionalHybridEnv, DATA_FILENAME
 
-# Φόρτωση δεδομένων
 df = pd.read_csv(DATA_FILENAME)
 df.columns = df.columns.str.strip()
 if 'Regenerative Braking Power (kW)' not in df.columns: df['Regenerative Braking Power (kW)'] = 0.0
 
-model = PPO.load("models/ppo_hev") # Φορτώνουμε το καλό μας μοντέλο
+model = PPO.load("models/ppo_hev") 
 
 results = {}
 
-# Δοκιμάζουμε 3 σενάρια
+#3 senaria
 scenarios = {
     "Winter (-5°C)": -5,
     "Spring (25°C)": 25,
@@ -20,9 +21,9 @@ scenarios = {
 }
 
 for season, temp in scenarios.items():
-    print(f"❄️☀️ Testing Scenario: {season}...")
+    print(f"Testing Scenario: {season}...")
     
-    # Φτιάχνουμε Environment με τη συγκεκριμένη θερμοκρασία
+  
     env = ProfessionalHybridEnv(df, temperature=temp)
     
     obs, _ = env.reset()
@@ -44,4 +45,4 @@ plt.bar(results.keys(), results.values(), color=['#3498db', '#2ecc71', '#e74c3c'
 plt.title("Impact of Weather on HEV Fuel Consumption")
 plt.ylabel("Fuel (Liters)")
 plt.savefig("weather_impact.png")
-print("✅ Graph saved: weather_impact.png")
+print("Graph saved: weather_impact.png")

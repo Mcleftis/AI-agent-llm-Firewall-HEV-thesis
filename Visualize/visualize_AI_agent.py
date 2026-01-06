@@ -6,7 +6,7 @@ from stable_baselines3 import PPO
 import matplotlib.pyplot as plt
 
 
-DATA_FILENAME = r"C:\Users\mclef\Desktop\thesis\my_working_dataset.csv"
+DATA_FILENAME = "data/my_working_dataset.csv"
 MODEL_PATH = "final_hybrid_agent_model"
 
 
@@ -121,5 +121,9 @@ if __name__ == "__main__":
     plt.grid(True)
     
     plt.tight_layout()
-    plt.show()
+    #docker
+    plt.savefig("visualize_AI_agent.png") 
+    print("Graph saved to visualize1_result.png")
+    plt.close() #katharismos mnhmhs
+
     

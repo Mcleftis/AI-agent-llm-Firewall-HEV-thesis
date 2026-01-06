@@ -2,76 +2,85 @@ import argparse
 import logging
 import sys
 import os
-from AI_agent import train_ppo
-from optimize import run_grid_search
-from evaluate_agent import run_evaluation
-from full_system import run_live_system
 
+#profiling.py
+try:
+    from profiling import measure_performance
+except ImportError:
+    #an leeipei to profiling.py, trekse to sketo
+    def measure_performance(func): return func
 
-logging.basicConfig(
-    level=logging.INFO, #emfanizontai INFO, WARNING, ERROR, CRITICAL
+logging.basicConfig(#emfanizontai INFO, WARNING, ERROR, CRITICAL
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',#Wra, hmeromhnia, info, error, mhnyma pou grafoume emeis sto log
     handlers=[logging.StreamHandler(sys.stdout)]#Steile ta logs sthn othonh, sys.stdout na pane stohn konsola
 )
 
+
 def main():
-    #emfanizetai an pathsoume python main.py --help
-    parser = argparse.ArgumentParser(description="Neuro-Symbolic HEV Control System CLI")
+    parser = argparse.ArgumentParser(description="Neuro-Symbolic HEV Control System CLI")#emfanizetai an pathsoume python main.py --help
     
-    # Mode
+    # Modes
     parser.add_argument(
         '--mode',#kaleitai me python main.py --mode train 
         type=str, 
         choices=['train', 'evaluate', 'demo', 'ablation', 'optimize'],#mono afta mporei na grapsei o xrhsths alliws varaei error
         required=True,#an den dwseis mode den trexei to programma
-        help='Select operation mode: train (PPO), evaluate (Test), demo (Live), ablation (Study)'
+        help='Select operation mode'
     )
 
-    parser.add_argument('--steps', type=int, default=100000, help='Total timesteps for PPO training')#posa timesteps tha ekpaideftei o PPO Agent,an den dwseis int tha exoume 100000
-    parser.add_argument('--lr', type=float, default=0.0003, help='Learning rate for the optimizer')#omoiows me panw edw einai gia learning rate
+    # Parameters
+    parser.add_argument('--steps', type=int, default=100000, help='Training steps')#posa timesteps tha ekpaideftei o PPO Agent,an den dwseis int tha exoume 100000
+    parser.add_argument('--lr', type=float, default=0.0003, help='Learning rate')
+    parser.add_argument('--traffic', type=str, default='normal', choices=['low', 'normal', 'heavy'])# px mporoume an to kalesoume me python main.py --mode train --traffic heavy
+    parser.add_argument('--driver_mood', type=str, default='neutral', help='Prompt for Demo')
     
-    parser.add_argument('--traffic', type=str, default='normal', choices=['low', 'normal', 'heavy'], help='Traffic density simulation')# px mporoume an to kalesoume me python main.py --mode train --traffic heavy
-    parser.add_argument('--driver_mood', type=str, default='neutral', help='Initial driver prompt (e.g., "I am in a hurry")')
-    
-    #edw leei pou tha apothikefsoume to arxeio
-    parser.add_argument('--model_path', type=str, default='models/ppo_hev', help='Path to save/load the model')
+    parser.add_argument('--model_path', type=str, default='models/ppo_hev', help='Model file path')#edw leei pou tha apothikefsoume to arxeio
 
     args = parser.parse_args()#afto diavazei ola ta arguments pou edwse o xrhsths sth consola
 
-    
     logging.info(f"Starting System in [{args.mode.upper()}] mode")#ta kanoume k kefalaia na einai efdiakrita
-    logging.info(f"Configuration: Traffic={args.traffic}, Mood='{args.driver_mood}'")
-
+    
+    #ektelesh me profiling
     try:
+        from AI_agent import train_ppo             # Train Mode
+        from full_system import run_live_system    # Demo Mode
+        from evaluate_agent import run_evaluation  # Evaluate Mode
+        from optimize import run_grid_search       # Optimize Mode
+        from run_ablation import run_study         # Ablation Mode
+
         if args.mode == 'train':
-            logging.info("Starting PPO Training process...")
-            train_ppo(steps=args.steps, lr=args.lr, save_path=args.model_path, traffic=args.traffic)
-            logging.info(f"Training completed. Model saved at {args.model_path}")
+            logging.info("Starting PPO Training...")
+            measured_train = measure_performance(train_ppo)
+            measured_train(steps=args.steps, lr=args.lr, save_path=args.model_path, traffic=args.traffic)
+            logging.info("Training Done.")
 
-        elif args.mode == 'evaluate':
-            logging.info("Evaluating model performance...")
-            results = run_evaluation(model_path=args.model_path, traffic=args.traffic)
-            logging.info("Evaluation finished.")
+        elif args.mode == 'evaluate':#gia na doume oti doulevei swsta
+            logging.info("Running Evaluation...")
+            measured_eval = measure_performance(run_evaluation)
+            measured_eval(model_path=args.model_path, traffic=args.traffic)
 
-        elif args.mode == 'demo':
-            logging.info("Initializing Neuro-Symbolic Live Demo...")
-            run_live_system(prompt=args.driver_mood, model_path=args.model_path)
+        elif args.mode == 'demo':#trexei to full_system.py
+            logging.info("Initializing Live Demo...")
+            measured_demo = measure_performance(run_live_system)
+            measured_demo(prompt=args.driver_mood, model_path=args.model_path)
             
-        elif args.mode == 'ablation':
-            logging.info("Running Ablation Study (No-LLM vs With-LLM)...")
-            from run_ablation import run_study  # <--- Import το αρχείο που φτιάξαμε
-            run_study()                         # <--- Εκτέλεση
-        
         elif args.mode == 'optimize':
-            logging.info("Starting Hyperparameter Optimization (Grid Search)...")
-            from optimize import run_grid_search
-            run_grid_search()
-            
+            logging.info("Starting Grid Search...")
+            measured_opt = measure_performance(run_grid_search)
+            measured_opt()
+
+        elif args.mode == 'ablation':
+            logging.info("Running Ablation Study...")
+            measured_ablation = measure_performance(run_study)
+            measured_ablation()
+    
     except ImportError as e:#energopoieitai mono an exoume thema me ta imports
         logging.error(f"Could not import module: {e}")
-        logging.error("Tip: Get assured that your files (train_agent.py etc.) are in the same folder.")
+        logging.error("Tip: Get assured that your files (train_agent.py etc.) are in the same folder.")  
+
     except Exception as e:
-        logging.error(f"Critical Error: {e}", exc_info=True)#h teleftai entolh deixnei olo to traceback. mas deixnei apeirws analytika ti kai pws.
+        logging.error(f"Critical Error during execution: {e}", exc_info=True)
 
 if __name__ == "__main__":
     main()

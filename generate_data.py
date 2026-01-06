@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 
-save_path = r"C:\Users\mclef\Desktop\thesis\my_working_dataset.csv"
+save_path = "data/my_working_dataset.csv"
 
 
 n_samples = 5000

@@ -7,7 +7,7 @@ import os
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 
-DATA_FILENAME = r"C:\Users\mclef\Desktop\thesis\my_working_dataset.csv"
+DATA_FILENAME = "data/my_working_dataset.csv"
 
 
 class ProfessionalHybridEnv(gym.Env):

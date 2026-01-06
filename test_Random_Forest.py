@@ -9,13 +9,16 @@
 #I observe in the plot that the lstm model remains stable at a value of 4,7. So I will run a traditional method of ML, to test if the dataset has a  problem.
 #I could do it with the file named baseline_models_vasika_montela.py, but I will create a new file named test.py for clarity.
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg') #gia to docker
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 
 
-df = pd.read_csv(r"C:\Users\mclef\Desktop\project_ai\nev_energy_management_dataset.csv")
+
+df = pd.read_csv("data/nev_energy_management_dataset.csv")
 
 
 df.replace(["N/A", "-", "unknown"], float("nan"), inplace=True)
@@ -42,7 +45,11 @@ plt.plot(y_test.values[:100], label='Real', color='black')
 plt.plot(y_pred[:100], label='Random Forest', color='green', linestyle='--')
 plt.title(f'Benchmark Test (R2: {r2:.3f})')
 plt.legend()
-plt.show()
+#docker
+plt.savefig("analysis_result.png") 
+print("Graph saved to random_forest.png")
+plt.close() #katharismos mnhmhs
+
 
 # Feature Importance to observe which features are most important
 importances = pd.Series(rf_model.feature_importances_, index=X.columns)

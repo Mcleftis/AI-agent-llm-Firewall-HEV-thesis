@@ -1,11 +1,12 @@
-import pandas as pd
+import matplotlib
+matplotlib.use('Agg') #gia to docker
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
 print("------------First Visualization Check------------")
 
-
-df = pd.read_csv(r"C:\Users\mclef\Desktop\project_ai\nev_energy_management_dataset.csv")
+df = pd.read_csv("data/nev_energy_management_dataset.csv")
 
 df.replace(["N/A", "-", "unknown"], float("nan"), inplace=True)
 df.dropna(inplace=True)
@@ -44,7 +45,10 @@ plt.title(f'{engine_power} vs {target}')
 plt.grid(True)
 
 plt.tight_layout()
-plt.show()
+#docker
+plt.savefig("analysis_result.png") 
+print("Graph saved to visualize_result.png")
+plt.close() #katharismos mnhmhs
 
 print("-----------------------------------Last Check-----------------------------------------")
 
@@ -66,4 +70,7 @@ plt.plot(power_norm, label='Engine Power (Normalized)', color='orange')
 plt.plot(fuel_norm, label='Fuel Consumption (Normalized)', color='black', linestyle='--')
 plt.title('Power and Consumption Synchronization: (Check for Lag)')
 plt.legend()
-plt.show()
+#docker
+plt.savefig("analysis_result.png") 
+print("Graph saved to visualize1_result.png")
+plt.close() #katharismos mnhmhs

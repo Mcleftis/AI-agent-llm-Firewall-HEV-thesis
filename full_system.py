@@ -7,61 +7,92 @@ import ollama
 import json
 import time
 import re
+import os
 
-#Settings
-DATA_FILENAME = r"C:\Users\mclef\Desktop\thesis\my_working_dataset.csv"
-MODEL_PATH = "final_hybrid_agent_model"
+DATA_FILENAME = "data/my_working_dataset.csv"
 
-#LLM
-def get_driver_intent():
+#LLM Engine, Semantics se agglika
+def get_driver_intent(forced_prompt=None):
     print("\n" + "="*50)
-    print("HYBRID AI SYSTEM: ONLINE")
+    print("HYBRID AI SYSTEM: SEMANTIC ENGINE ONLINE")
     print("="*50)
-    user_command = input("Tell the car how to drive(Greek, English): (π.χ. 'Βιάζομαι', 'Χαλαρά'): ")
     
-    print("AI analyses...")
+    if forced_prompt:
+        user_command = forced_prompt
+    else:
+        user_command = input("Driver Command (Say anything): ")
     
-    #Improved Prompt in order to understand Greek
+    print("AI analyses semantic meaning...")
+    
     system_prompt = """
-    You are the ECU of a Hybrid Car. Translate the driver's command (which might be in Greek or English) to JSON.
+    You are the AI Control Unit of a generic autonomous vehicle.
+    Your task is to analyze the DRIVER'S INTENT based on their input (Greek or English).
     
-    Rules:
-    - If driver says "hurry", "fast", "βιάζομαι", "τρέξε" -> aggressiveness: 1.0, mode: "SPORT"
-    - If driver says "relax", "eco", "χαλαρά", "οικονομικά" -> aggressiveness: 0.0, mode: "ECO"
-    
-    Output keys: 
-    - 'aggressiveness' (0.0 to 1.0)
-    - 'soc_target' (0-100)
-    - 'mode' (string)
-    
-    Example output: {"aggressiveness": 0.8, "soc_target": 50, "mode": "SPORT"}
-    Output ONLY JSON.
+    Steps to follow:
+    1. Detect language (Greek/English).
+    2. Identify sentiment (Urgency, Relaxation, Anger, Panic, Metaphors).
+    3. Determine the 'Urgency Score' on a scale of 0 to 10.
+
+    ### SCORING RULES ###
+    - SCORE 8-10 (SPORT/RACE): Mentions of racing drivers (Hamilton, Rossi, McRae, Senna), fast cars (Ferrari, Porsche), metaphors (Rocket, Fire, Sfentona, Missile), or panic/emergency.
+    - SCORE 0-2 (ECO/SLEEP): Mentions of slow animals (Turtle, Snail), family members (Grandma), relaxation (Sleep, Chill, Volta, Laraxa), or safety/economy.
+    - SCORE 4-6 (NORMAL): Standard instructions, balanced driving.
+
+    ### OUTPUT FORMAT ###
+    You must return ONLY a JSON object:
+    {"urgency_score": <int 0-10>, "reasoning": "<short explanation>"}
     """
     
-    params = {"aggressiveness": 0.0, "soc_target": 60, "mode": "NORMAL"} # Default
+    # Default Params (Fallback)
+    params = {"mode": "NORMAL", "aggressiveness": 0.5}
 
     try:
-        response = ollama.chat(model='llama3', messages=[
+        client = ollama.Client(host='http://127.0.0.1:11434')
+        response = client.chat(model='llama3', messages=[
             {'role': 'system', 'content': system_prompt},
             {'role': 'user', 'content': user_command},
         ])
-        content = response['message']['content']
         
-        # Smarter find JSON
+        content = response['message']['content']
+        print(f"AI Internal Thought: {content}") 
+
+        #eksagwgh tou json
         json_match = re.search(r'\{.*\}', content, re.DOTALL)
         if json_match:
-            json_str = json_match.group(0)
-            params = json.loads(json_str)
-            print(f"Command Received: {params.get('mode', 'UNKNOWN')} (Aggr: {params.get('aggressiveness', 0)})")
-        else:
-            print("LLM responded with text instead of a JSON file. Setting Default.")
+            result = json.loads(json_match.group(0))
+            score = result.get("urgency_score", 5)
+            reason = result.get("reasoning", "No reason provided")
             
+            #Den menoume pote sto normal an to score einai akraio
+            if score >= 7:
+                mode = "SPORT"
+                aggressiveness = 1.0 # Τέρμα γκάζι
+            elif score <= 3:
+                mode = "ECO"
+                aggressiveness = 0.1 # Πολύ χαλαρά
+            else:
+                mode = "NORMAL"
+                aggressiveness = float(score) / 10.0 # Δυναμική προσαρμογή
+                
+            print(f"Analysis: {reason}")
+            print(f"Result: Score {score}/10 -> Mode: {mode}")
+            
+            params = {"mode": mode, "aggressiveness": aggressiveness}
+        else:
+            print("JSON Parsing failed. Using Heuristics.")
+            # Fallback σε απλή λογική αν αποτύχει το JSON
+            cmd = user_command.lower()
+            if any(x in cmd for x in ['fast', 'trexa', 'viazomai', 'hamilton', 'rossi']):
+                params = {"mode": "SPORT", "aggressiveness": 1.0}
+            elif any(x in cmd for x in ['slow', 'siga', 'laraxa', 'eco']):
+                params = {"mode": "ECO", "aggressiveness": 0.2}
+
     except Exception as e:
-        print(f"LLM Error {e}. Default.")
-    
+        print(f"LLM Error: {e}")
+        
     return params
 
-
+#Environment
 class ProfessionalHybridEnv(gym.Env):
     def __init__(self, df):
         super(ProfessionalHybridEnv, self).__init__()
@@ -79,13 +110,17 @@ class ProfessionalHybridEnv(gym.Env):
 
     def _get_obs(self):
         row = self.df.iloc[self.current_step]
-        pwr = row.get('Engine Power (kW)', 0) - row.get('Regenerative Braking Power (kW)', 0)
+        eng_pwr = row.get('Engine Power (kW)', 0)
+        reg_pwr = row.get('Regenerative Braking Power (kW)', 0)
+        pwr = eng_pwr - reg_pwr
         return np.array([row.get('Speed (km/h)', 0), row.get('Acceleration (m/s²)', 0), pwr, self.soc], dtype=np.float32)
 
     def step(self, action):
         u_engine = float(action[0])
         row = self.df.iloc[self.current_step]
-        pwr = row.get('Engine Power (kW)', 0) - row.get('Regenerative Braking Power (kW)', 0)
+        eng_pwr = row.get('Engine Power (kW)', 0)
+        reg_pwr = row.get('Regenerative Braking Power (kW)', 0)
+        pwr = eng_pwr - reg_pwr
         
         fuel = 0.0
         if pwr <= 0:
@@ -97,54 +132,68 @@ class ProfessionalHybridEnv(gym.Env):
         self.soc = np.clip(self.soc, 0, 100)
         self.current_step += 1
         
-        
-        # Adding soc in dictionary
         info = {"fuel": fuel, "soc": self.soc}
-        
-        return self._get_obs(), 0, self.current_step >= len(self.df)-1, False, info
+        terminated = self.current_step >= len(self.df) - 1
+        return self._get_obs(), 0, terminated, False, info
 
-# Main programme
-if __name__ == "__main__":
-   
-    df = pd.read_csv(DATA_FILENAME); df.columns = df.columns.str.strip()
+#Main Run function
+def run_live_system(prompt="neutral", model_path="models/ppo_hev"):
+    if not os.path.exists(DATA_FILENAME):
+        if os.path.exists("my_working_dataset.csv"):
+            csv_path = "my_working_dataset.csv"
+        else:
+            print(f"Error: Dataset not found.")
+            return
+    else:
+        csv_path = DATA_FILENAME
+
+    df = pd.read_csv(csv_path)
+    df.columns = df.columns.str.strip()
+    
     env = ProfessionalHybridEnv(df)
     
-    print("Loading PPO...")
+    print(f"Loading PPO Agent from: {model_path}...")
     try:
-        model = PPO.load(MODEL_PATH)
-    except:
-        print("Run firstly AI_agent.py!"); exit()
+        model = PPO.load(model_path)
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return
 
-    #Get a command from LLM
-    llm_params = get_driver_intent()
+    #Lhpsh entolhs mesw LLM
+    llm_params = get_driver_intent(forced_prompt=prompt)
     
-    #Drive by having LLM as a guideline
     mode = llm_params.get('mode', 'NORMAL')
-    print(f"\n🏎️  Ξεκινάει η οδήγηση σε mode: {mode}...")
+    aggressiveness = float(llm_params.get('aggressiveness', 0.0))
+    
+    print(f"\nStarting Drive Mode: [{mode}]")
     time.sleep(1)
     
     obs, _ = env.reset()
     total_fuel = 0
-    aggressiveness = float(llm_params.get('aggressiveness', 0.0))
     
-    #1000 steps
-    for i in range(1000):
+    steps_to_run = min(1000, len(df)-1)
+    for i in range(steps_to_run):
         action, _ = model.predict(obs)
         
-        # Modifier: If sport, press throttle.
-        if aggressiveness > 0.5:
-            action[0] = max(action[0], aggressiveness * 0.9) # Boost
+        # LLM Injection Logic
+        if aggressiveness > 0.6:
+            action[0] = max(action[0], aggressiveness * 0.9)
+        elif aggressiveness < 0.3:
+             action[0] = min(action[0], 0.5) 
             
         obs, _, done, _, info = env.step(action)
         total_fuel += info['fuel']
         
         if i % 200 == 0:
-            
-            print(f"   Step {i}: SOC={info['soc']:.1f}%, Fuel so far={total_fuel:.2f}L")
+            print(f"Step {i}: SOC={info['soc']:.1f}%, Fuel Used={total_fuel:.2f}L")
             
         if done: break
 
     print("\n" + "="*40)
-    print(f"End of ride ({mode})")
-    print(f"Final consumption: {total_fuel:.2f} Liters")
+    print(f"End of Ride Summary ({mode})")
+    print(f"Final Consumption: {total_fuel:.2f} Liters")
+    print(f"Final Battery: {info['soc']:.1f}%")
     print("="*40)
+
+if __name__ == "__main__":
+    run_live_system()

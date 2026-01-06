@@ -10,7 +10,7 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from data_processor import get_data_ready, create_sequences
 
 
-FILE_PATH = r"C:\Users\mclef\Desktop\thesis\my_working_dataset.csv"
+FILE_PATH = "data/my_working_dataset.csv"
 TIME_STEPS = 60
 
 X_scaled, y_scaled, scaler_y=get_data_ready(FILE_PATH)

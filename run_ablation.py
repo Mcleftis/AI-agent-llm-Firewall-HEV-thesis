@@ -6,7 +6,7 @@ import os
 
 #Settings
 MODEL_PATH = "models/ppo_hev"  #To monopati pou swsame to montelo
-RESULTS_FILE = "ablation_results.csv"
+RESULTS_FILE = "data/ablation_results.csv"
 
 def run_simulation(mode='baseline'):
     """

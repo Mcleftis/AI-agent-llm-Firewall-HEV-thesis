@@ -4,8 +4,9 @@ from gymnasium import spaces
 import numpy as np
 from stable_baselines3 import PPO
 
+#sygkrinoume me xazo odhgo ton AI_agent
 
-DATA_FILENAME = r"C:\Users\mclef\Desktop\thesis\my_working_dataset.csv"
+DATA_FILENAME = "data/my_working_dataset.csv"
 MODEL_PATH = "final_hybrid_agent_model"
 
 
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     
     #Creating two identical environments
     env_ai = ProfessionalHybridEnv(df)
-    env_dumb = ProfessionalHybridEnv(df) # Για τον "χαζό" οδηγό
+    env_dumb = ProfessionalHybridEnv(df) #Xazos odhgos mono venzinh
     
     
     print("Loading AI Agent...")

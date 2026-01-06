@@ -3,6 +3,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
+import matplotlib
+matplotlib.use('Agg') #gia to docker
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -29,7 +31,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 
 #Load, print dataset
-df = pd.read_csv(r"C:\Users\mclef\Desktop\project_ai\nev_energy_management_dataset.csv")
+df = pd.read_csv("data/nev_energy_management_dataset.csv")
 print(df.head())
 print(df.info())
 
@@ -156,4 +158,7 @@ plt.xlabel('Δείγματα Διαδρομής/Route Samples,  (Χρόνος/Ti
 plt.ylabel('Κατανάλωση/Consumption (L/100km)', fontsize=12)
 plt.legend()
 plt.grid(True, alpha=0.3)
-plt.show()
+#docker
+plt.savefig("analysis_result.png") 
+print("Graph saved to baseline_models.png")
+plt.close() #katharismos mnhmhs

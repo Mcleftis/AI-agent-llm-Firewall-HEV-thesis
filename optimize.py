@@ -6,7 +6,7 @@ from AI_agent import train_ppo
 from run_ablation import run_simulation 
 
 
-RESULTS_FILE = "grid_search_results.csv"#apotelesamta grid search
+RESULTS_FILE = "data/grid_search_results.csv" #apotelesamta grid search
 MODELS_DIR = "models"#montela pou ekpaidevontai
 
 def run_grid_search():
