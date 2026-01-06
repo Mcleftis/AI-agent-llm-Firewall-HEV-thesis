@@ -44,7 +44,7 @@ Python 3.8 or higher, Ollama (for Llama 3), and optionally Docker.
 Setup Steps:
 
 1. Clone the repository:
-   git clone https://github.com/yourusername/neuro-symbolic-hev-thesis.git
+   git clone https://github.com/yourusername/neuro-symbolic-hev-thesis](https://github.com/Mcleftis/AI-agent-llm-hybrid-control.git
    cd neuro-symbolic-hev-thesis
 
 2. Install Python Dependencies:
