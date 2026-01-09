@@ -67,7 +67,7 @@ class TestNeuroSymbolicReliability:
         assert "aggressiveness" in result, "Missing 'aggressiveness' in output"#to idio me panw
         
         # Έλεγχος τύπων δεδομένων (Type Safety)
-        assert isinstance(result['mode'], str), "'mode' must be a string"
-        assert isinstance(result['aggressiveness'], float), "'aggressiveness' must be a float"
+        assert isinstance(result['mode'], str), "'mode' must be a string"#tsekarei an to result['mode'] einai string
+        assert isinstance(result['aggressiveness'], float), "'aggressiveness' must be a float"#tsekarei an to result['aggressiveness'] einai float
         
         print("-> Schema Validated Successfully.")
