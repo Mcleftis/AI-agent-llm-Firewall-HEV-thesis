@@ -24,6 +24,6 @@ jobs:
         pip install pandas numpy gymnasium stable-baselines3 ollama pytest
 
     # 4. Τρέχει τα Unit Tests που έφτιαξες!
-    - name: Run Test Suite
+    - name: Run Test All
       run: |
-        python tests/test_suite.py
+        python test_all.py
