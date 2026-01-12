@@ -10,6 +10,15 @@ import re
 import os
 from typing import Dict, Any, Optional
 
+
+#active directory
+try:
+    from active_directory.connector import ADManager
+    AD_AVAILABLE = True
+except ImportError:
+    print("⚠️ Active Directory module not found. Skipping Authentication.")
+    AD_AVAILABLE = False
+
 # Προσπάθεια εισαγωγής του Rust Firewall. Αν δεν υπάρχει, χρησιμοποιούμε Mock.
 try:
     import rust_can_firewall
@@ -242,7 +251,29 @@ def get_driver_intent(forced_prompt: Optional[str] = None) -> Dict[str, Any]:
 def run_live_system(prompt: Optional[str] = None, model_path: str = MODEL_PATH):
     """
     Main loop integrating Deep RL (PPO) with Symbolic AI (LLM) & Physics Engine.
-    """
+    """    
+    # 👇 --- 0. SECURITY CHECK (ACTIVE DIRECTORY) --- 👇
+    if AD_AVAILABLE:
+        print("\n🔒 [SECURITY] Biometric/Credentials Check Required...")
+        ad = ADManager()
+        
+        # Εδώ κανονικά θα τα ζητούσες από input, ή hardcoded για το demo
+        user = input("👤 Username: ")          # π.χ. driver_01
+        pwd  = input("🔑 Password: ")          # π.χ. Deloitte2026!
+        
+        is_auth, groups = ad.authenticate_user(user, pwd)
+        
+        if not is_auth:
+            print("⛔ [ACCESS DENIED] Wrong credentials. Engine locked.")
+            return # <--- Σταματάει εδώ το πρόγραμμα!
+            
+        if "Drivers" not in groups:
+            print(f"⛔ [ACCESS DENIED] User '{user}' is not a Certified Driver. Engine locked.")
+            return # <--- Σταματάει εδώ!
+            
+        print(f"✅ [ACCESS GRANTED] Welcome Driver. Groups: {groups}")
+        print("   Initializing Engine Systems...\n")
+
     # 1. Load Data (For Scenario Generation)
     # Ψάχνουμε το αρχείο σε πιθανά paths
     possible_files = [DATA_FILENAME, "my_working_dataset.csv", "data/my_working_dataset.csv"]
