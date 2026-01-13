@@ -55,11 +55,6 @@ def main():
             measured_train(steps=args.steps, lr=args.lr, save_path=args.model_path, traffic=args.traffic)
             logging.info("Training Done.")
 
-        elif args.mode == 'evaluate':#gia na doume oti doulevei swsta
-            logging.info("Running Evaluation...")
-            measured_eval = measure_performance(run_evaluation)
-            measured_eval(model_path=args.model_path, traffic=args.traffic)
-
         elif args.mode == 'demo':#trexei to full_system.py
             logging.info("Initializing Live Demo...")
             measured_demo = measure_performance(run_live_system)

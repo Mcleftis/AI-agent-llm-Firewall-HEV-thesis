@@ -4,7 +4,7 @@ import pandas as pd
 import time
 import os
 import sys
-
+from unittest.mock import patch
 
 
 #psaxnoume ton simulator
@@ -66,23 +66,34 @@ class TestPhysicsAndControl(unittest.TestCase):
 class TestCyberSecurity(unittest.TestCase):
     
     def setUp(self):
-        self.firewall = CANBusFirewall(max_delta=50, max_packets=20, auth_token="SECRET_DRIVER_KEY_2026")
+        # Αρχικοποίηση (εδώ θα πάρει ό,τι βρει στο πραγματικό env ή None)
+        # Δεν μας πειράζει, γιατί θα το "καπελώσουμε" στο τεστ.
+        self.firewall = CANBusFirewall(max_delta=50, max_packets=20)
 
+    # ΕΔΩ ΕΙΝΑΙ Η ΜΑΓΚΙΑ:
+    # Λέμε στο Python: "Κάνε πως το κλειδί στο .env είναι 'DUMMY_KEY_123'"
+    # Δεν βάζουμε το αληθινό μας κλειδί!
+    @patch.dict(os.environ, {"CAN_AUTH_TOKEN": "DUMMY_KEY_123"})
     def test_03_authentication(self):
-        """[Security] Ελέγχει Hacker vs Driver."""
-        print("\n[Security] Testing Auth Protocol...")
-        self.assertFalse(self.firewall.verify_token("HACKER_123"), "Fail: Hacker got in!")
-        self.assertTrue(self.firewall.verify_token("SECRET_DRIVER_KEY_2026"), "Fail: Driver blocked!")
+        """[Security] Ελέγχει Hacker vs Driver με ΨΕΥΤΙΚΟ κλειδί δοκιμής."""
+        print("\n[Security] Testing Auth Protocol (with Mock Token)...")
+        
+        # Πρέπει να ξανα-φτιάξουμε το firewall ΜΕΣΑ στο context για να διαβάσει το DUMMY key
+        fw = CANBusFirewall(max_delta=50, max_packets=20)
+        
+        # Τώρα ελέγχουμε αν το firewall δέχεται το DUMMY κλειδί
+        self.assertTrue(fw.verify_token("DUMMY_KEY_123"), "Fail: Το Firewall δεν δέχτηκε το σωστό token!")
+        
+        # Και ελέγχουμε αν απορρίπτει τον Hacker
+        self.assertFalse(fw.verify_token("HACKER_666"), "Fail: Ο Hacker μπήκε μέσα!")
 
     def test_04_spoofing_prevention(self):
-        """[Security] Ελέγχει Teleport Hack (Απότομη αλλαγή ταχύτητας)."""
+        """[Security] Ελέγχει Teleport Hack."""
         print("\n[Security] Testing Spoofing Attack...")
-        self.firewall.inspect_packet(0x100, "50.0") # Normal speed
-        #ksafnikh allagh se 200km/h
+        # Εδώ δεν μας νοιάζει το token, ελέγχουμε τα packets
+        self.firewall.inspect_packet(0x100, "50.0") 
         is_safe = self.firewall.inspect_packet(0x100, "200.0") 
-        #perimenoume false
         self.assertFalse(is_safe, "Security Fail: Spoofing attack was NOT blocked!")
-
 # ==============================================================================
 # TEST SUITE 3: ML OPERATIONS (Dataset & Model)
 # ==============================================================================

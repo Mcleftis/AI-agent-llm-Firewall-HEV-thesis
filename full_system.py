@@ -9,7 +9,7 @@ import time
 import re
 import os
 from typing import Dict, Any, Optional
-
+import getpass
 
 #active directory
 try:
@@ -259,7 +259,11 @@ def run_live_system(prompt: Optional[str] = None, model_path: str = MODEL_PATH):
         
         # Εδώ κανονικά θα τα ζητούσες από input, ή hardcoded για το demo
         user = input("👤 Username: ")          # π.χ. driver_01
-        pwd  = input("🔑 Password: ")          # π.χ. Deloitte2026!
+        try:
+            pwd = getpass.getpass("🔑 Password (Hidden): ")
+        except Exception:
+            print("⚠️ Warning: Hidden input not supported inside this terminal.")
+            pwd = input("🔑 Password (Visible): ")         
         
         is_auth, groups = ad.authenticate_user(user, pwd)
         

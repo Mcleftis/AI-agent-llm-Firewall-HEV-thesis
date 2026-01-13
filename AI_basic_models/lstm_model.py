@@ -7,13 +7,20 @@ from sklearn.metrics import r2_score, mean_absolute_error
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
-from data_processor import get_data_ready, create_sequences
+from data_processor_for_lstm import get_data_ready, create_sequences
+import os
+import pandas as pd
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
-FILE_PATH = "data/my_working_dataset.csv"
+DATA_PATH = os.path.join(current_dir, '..', 'data', 'my_working_dataset.csv')
+
+print(f"Loading dataset from: {DATA_PATH}")
+df = pd.read_csv(DATA_PATH)
+
 TIME_STEPS = 60
 
-X_scaled, y_scaled, scaler_y=get_data_ready(FILE_PATH)
+X_scaled, y_scaled, scaler_y=get_data_ready(DATA_PATH)
 
 #sequence creation
 X_seq, y_seq=create_sequences(X_scaled, y_scaled, TIME_STEPS)

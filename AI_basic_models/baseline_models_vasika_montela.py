@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
+import os
 import matplotlib
 matplotlib.use('Agg') #gia to docker
 import matplotlib.pyplot as plt
@@ -30,8 +30,30 @@ from sklearn.metrics import accuracy_score
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 
-#Load, print dataset
-df = pd.read_csv("data/nev_energy_management_dataset.csv")
+import pandas as pd
+import os
+import sys
+
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+#vres to root folder
+ROOT_DIR = os.path.abspath(os.path.join(current_dir, '..'))
+
+#vale to root sto path gia imports
+sys.path.append(ROOT_DIR)
+
+#ftiakse to swsto monopati gia ta dedomena
+DATA_PATH = os.path.join(ROOT_DIR, "data", "my_working_dataset.csv")
+
+print(f"Loading data from: {DATA_PATH}")
+
+#fortwse to swsto csv me to swsto path
+if os.path.exists(DATA_PATH):
+    df = pd.read_csv(DATA_PATH)
+else:
+    print("Error: Dataset not found!")
+
 print(df.head())
 print(df.info())
 
@@ -44,7 +66,12 @@ print("The columns of the dataset are:", df.columns)
 df.replace(["N/A","-","unknown"], np.nan, inplace=True)
 
 #eksairesh twn kathgorikwn sthlwn(exclude categorical columns)
-cols_to_fix=df.columns.drop(["Driving Cycle Type", "Target Efficiency"])
+
+#elegxoume prwta an yparxoun
+cols_to_exclude = ["Driving Cycle Type", "Target Efficiency"]
+
+#krata mono tis sthles pou den einai sth lista tou apokleismou
+cols_to_fix = [c for c in df.columns if c not in cols_to_exclude]
 
 #metatroph se noumera aftwn twn sthlwn(Converting these columns into numbers)
 for col in cols_to_fix:
@@ -67,8 +94,12 @@ for col in numeric_cols:
 
 
 #kanonikopoihsh kathgorikwn sthlwn(One hot encoding on "Driving Cycle Type")
-df=pd.get_dummies(df, columns=["Driving Cycle Type"], drop_first=True)
 
+if "Driving Cycle Type" in df.columns:
+    print("Encoding 'Driving Cycle Type'...")
+    df = pd.get_dummies(df, columns=["Driving Cycle Type"], drop_first=True)
+else:
+    print("Column 'Driving Cycle Type' missing. Skipping encoding (Not needed for this dataset).")
 print("Megethos Dataset(Dataset Size)", df.shape)
 
 #diagrafh target efficiency(Delete "Target Efficiency")
@@ -76,7 +107,6 @@ if 'Target Efficiency' in df.columns:
     df = df.drop('Target Efficiency', axis=1)
 
 #SCALING
-
 
 #orismos metavlhtwn(Variable Declaration)
 target_col="Fuel Consumption (L/100km)"
