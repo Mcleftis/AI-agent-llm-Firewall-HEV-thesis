@@ -20,5 +20,5 @@ echo "[4/4] Pushing to GitHub..."
 git push origin main
 
 echo "------------------------------------------------"
-echo "Telos. Pame gia kafe."
+echo "Finish"
 pause
