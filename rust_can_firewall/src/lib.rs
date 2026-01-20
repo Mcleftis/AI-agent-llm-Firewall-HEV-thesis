@@ -1,47 +1,58 @@
 use pyo3::prelude::*;
-use std::collections::HashSet;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
-// Βοηθητική συνάρτηση (ίδια με πριν)
-fn get_allowed_ids() -> HashSet<u32> {
-    let mut ids = HashSet::new();
-    ids.insert(0x100); 
-    ids.insert(0x200); 
-    ids.insert(0x300); 
-    ids.insert(0x400); 
-    ids
-}
+// Παγκόσμιος Μετρητής (Global Counter)
+static BLOCKED_COUNT: AtomicUsize = AtomicUsize::new(0);
 
-// Η συνάρτηση που θα καλεί η Python
+/// 1. ΠΑΛΙΑ ΣΥΝΑΡΤΗΣΗ: Ελέγχει πακέτα (Passive Monitor)
+/// Επιστρέφει True/False, αλλά δεν αλλάζει τα δεδομένα.
 #[pyfunction]
-fn inspect_packet(packet_id: u32, payload: &str) -> bool {
-    let allowed_ids = get_allowed_ids();
-    if !allowed_ids.contains(&packet_id) {
+fn inspect_packet(packet_id: u32, payload: String) -> bool {
+    if payload.contains("DROP") || payload.contains("DELETE") || payload.contains("fuzz") {
+        BLOCKED_COUNT.fetch_add(1, Ordering::Relaxed);
         return false;
     }
-
-    let attack_patterns = vec![
-        "DROP TABLE",
-        "xxA1", 
-        "OVERRIDE", 
-        "ADMIN"
-    ];
-
-    for pattern in attack_patterns {
-        if payload.contains(pattern) {
-            return false;
-        }
+    if packet_id == 0x666 || packet_id > 0x7FF {
+        BLOCKED_COUNT.fetch_add(1, Ordering::Relaxed);
+        return false;
     }
-
-    if payload.len() > 64 {
-        return false; 
-    }
-
     true
 }
 
-// ΕΔΩ ΕΙΝΑΙ Η ΑΛΛΑΓΗ (Bound API)
+/// 2. ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Φιλτράρει Εντολές (Active Safety) 🛡️
+/// Αυτή μπαίνει "σφήνα" πριν εκτελεστεί η εντολή.
+/// Αν είναι επικίνδυνη, επιστρέφει None (null).
+/// Αν είναι ασφαλής, επιστρέφει την εντολή (Some).
+#[pyfunction]
+fn sanitize_command(command: String) -> Option<String> {
+    // Λίστα απαγορευμένων εντολών (Safety Rules)
+    // 1. Κόβουμε τέρμα γκάζι (Safety)
+    // 2. Κόβουμε SQL Injection (Security)
+    if command.contains("MAX_THROTTLE") || command.contains("DROP") || command.contains("fuzz") {
+        // Καταγράφουμε την επίθεση
+        BLOCKED_COUNT.fetch_add(1, Ordering::Relaxed);
+        // Επιστρέφουμε ΤΙΠΟΤΑ (μπλοκάρισμα)
+        return None; 
+    }
+    
+    // Αν όλα είναι καθαρά, αφήνουμε την εντολή να περάσει
+    Some(command)
+}
+
+/// 3. ΣΥΝΑΡΤΗΣΗ ΣΤΑΤΙΣΤΙΚΩΝ
+#[pyfunction]
+fn get_firewall_stats() -> usize {
+    BLOCKED_COUNT.load(Ordering::Relaxed)
+}
+
+/// ΤΟ MODULE ΠΟΥ ΒΛΕΠΕΙ Η PYTHON
 #[pymodule]
 fn rust_can_firewall(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(inspect_packet, m)?)?;
+    m.add_function(wrap_pyfunction!(get_firewall_stats, m)?)?;
+    
+    // ΠΡΟΣΟΧΗ: Προσθέσαμε και την καινούργια εδώ!
+    m.add_function(wrap_pyfunction!(sanitize_command, m)?)?; 
+    
     Ok(())
 }

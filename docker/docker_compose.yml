@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  #o Myalo (Ollama Service)
+  ollama-service:
+    image: ollama/ollama:latest
+    container_name: ollama_llm
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    
+    # Rythmiseis gia NVIDIA GPU (an exeis)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  #To systhma mas (Python Agent + GUI)
+  hev-control-system:
+    build: 
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: hev_agent
+    volumes:
+      - .:/app  #Live Sync: Allazeis kwdika kai enhmerwnetai automata!
+      - /tmp/.X11-unix:/tmp/.X11-unix #Gia na anoigei to GUI (se Linux)
+    environment:
+      # Prosoxh: Edw den vazoume 127.0.0.1 alla to onoma tou service
+      - OLLAMA_HOST=http://ollama-service:11434
+      - DISPLAY=${DISPLAY} # Gia to GUI
+    depends_on:
+      - ollama-service
+    # Afto xreiazetai gia na krataei to container anoixto
+    command: tail -f /dev/null 
+
+volumes:
+  ollama_data:
