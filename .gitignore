@@ -9,3 +9,13 @@ venv/
 # Secrets
 .env
 *.env
+
+
+.env
+api/certs/
+*.pem
+*.key
+
+# Python junk
+__pycache__/
+*.pyc

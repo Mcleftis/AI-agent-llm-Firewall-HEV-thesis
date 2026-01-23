@@ -33,7 +33,7 @@ CORS(app)
 BASE_URL = '/api/v1'
 
 # --- SECURITY CONFIGURATION (IAM & SRA) ---
-API_SECRET_TOKEN = "deloitte-super-secret-key-2025"
+API_SECRET_TOKEN = "super-secret-key-2025"
 
 # --- ENDPOINT 1: AI CONTROL & SAFETY CHECK (POST) ---
 @app.route(f'{BASE_URL}/control/intent', methods=['POST'])
