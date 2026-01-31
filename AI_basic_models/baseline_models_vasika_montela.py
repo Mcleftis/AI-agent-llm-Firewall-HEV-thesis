@@ -37,18 +37,18 @@ import sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-#vres to root folder
+
 ROOT_DIR = os.path.abspath(os.path.join(current_dir, '..'))
 
-#vale to root sto path gia imports
+
 sys.path.append(ROOT_DIR)
 
-#ftiakse to swsto monopati gia ta dedomena
+
 DATA_PATH = os.path.join(ROOT_DIR, "data", "my_working_dataset.csv")
 
 print(f"Loading data from: {DATA_PATH}")
 
-#fortwse to swsto csv me to swsto path
+
 if os.path.exists(DATA_PATH):
     df = pd.read_csv(DATA_PATH)
 else:
@@ -60,31 +60,31 @@ print(df.info())
 
 print("The columns of the dataset are:", df.columns)
 
-#Cleaning
 
-#antikatastash lathos timwn(Replacing wrong values)
+
+
 df.replace(["N/A","-","unknown"], np.nan, inplace=True)
 
-#eksairesh twn kathgorikwn sthlwn(exclude categorical columns)
 
-#elegxoume prwta an yparxoun
+
+
 cols_to_exclude = ["Driving Cycle Type", "Target Efficiency"]
 
-#krata mono tis sthles pou den einai sth lista tou apokleismou
+
 cols_to_fix = [c for c in df.columns if c not in cols_to_exclude]
 
-#metatroph se noumera aftwn twn sthlwn(Converting these columns into numbers)
+
 for col in cols_to_fix:
     df[col]=pd.to_numeric(df[col], errors='coerce')
 
-#diagrafh NaN kai duplicates(Deleting NaN and Duplicates)
+
 df=df.dropna()
 df=df.drop_duplicates()
 
-#numeric
+
 numeric_cols=df.select_dtypes(include=[np.number]).columns
 
-#katharismos outliers(Cleaning outliers)
+
 
 for col in numeric_cols:
    Q1=df[col].quantile(0.25)
@@ -93,7 +93,7 @@ for col in numeric_cols:
    df=df[(df[col] >= Q1-1.5*IQR) & (df[col] <= Q3+1.5*IQR)]
 
 
-#kanonikopoihsh kathgorikwn sthlwn(One hot encoding on "Driving Cycle Type")
+
 
 if "Driving Cycle Type" in df.columns:
     print("Encoding 'Driving Cycle Type'...")
@@ -102,13 +102,13 @@ else:
     print("Column 'Driving Cycle Type' missing. Skipping encoding (Not needed for this dataset).")
 print("Megethos Dataset(Dataset Size)", df.shape)
 
-#diagrafh target efficiency(Delete "Target Efficiency")
+
 if 'Target Efficiency' in df.columns:
     df = df.drop('Target Efficiency', axis=1)
 
-#SCALING
 
-#orismos metavlhtwn(Variable Declaration)
+
+
 target_col="Fuel Consumption (L/100km)"
 
 X=df.drop(target_col, axis=1)
@@ -120,13 +120,13 @@ X_train, X_test, y_train, y_test=train_test_split(
     random_state=42
 )
 
-#scaling
+
 
 scaler=MinMaxScaler()
 X_train_scaled=scaler.fit_transform(X_train)
 X_test_scaled=scaler.transform(X_test)
 
-#linear regression
+
 
 model=LinearRegression()
 model.fit(X_train_scaled, y_train)
@@ -135,13 +135,13 @@ print("MSE:", mean_squared_error(y_test, y_pred))
 print("MAE:", mean_absolute_error(y_test, y_pred))
 print("R^2", r2_score(y_test,y_pred))
 
-#paradeigma(Example)
+
 results_df = pd.DataFrame({'Real': y_test.values, 'Predict': y_pred})
 print(results_df.head())
 
 print("We see that we have negative score of R^2, so we can understand that we cannot solve our problem with Linear Regression.")
 
-#XGBoost
+
 model2=xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
 model2.fit(X_train_scaled, y_train)
 y_pred_xgb=model2.predict(X_test_scaled)
@@ -150,7 +150,7 @@ print("MAE meta apo xgboost:", mae)
 r2_xgb=r2_score(y_test, y_pred_xgb)
 print("R2 score xgboost:", r2_xgb)
 
-#neural network
+
 model=Sequential([
     Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)),
     Dropout(0.2),
@@ -176,7 +176,7 @@ mae_nn=mean_absolute_error(y_test, y_pred_nn)
 print(f"R² Score Neural Network: {r2_nn:.5f}")
 print(f"MAE Neural Network: {mae_nn:.4f} L/100km")
 
-#VISUALIZATION
+
 
 plt.figure(figsize=(15,6))
 plt.plot(y_test.values, color='blue', linewidth=2, label="Real Consumption")
@@ -188,7 +188,7 @@ plt.xlabel('Δείγματα Διαδρομής/Route Samples,  (Χρόνος/Ti
 plt.ylabel('Κατανάλωση/Consumption (L/100km)', fontsize=12)
 plt.legend()
 plt.grid(True, alpha=0.3)
-#docker
+
 plt.savefig("analysis_result.png") 
 print("Graph saved to baseline_models.png")
 plt.close() #katharismos mnhmhs

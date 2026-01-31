@@ -15,29 +15,29 @@ def run_grid_search():
     learning_rates_to_test = [0.0001, 0.0003, 0.001]
     results = []#edw tha mpoun dictionaries mesa
 
-    # Check if directory exists
+
     if not os.path.exists(MODELS_DIR):
         os.makedirs(MODELS_DIR)
 
     for lr in learning_rates_to_test:
         print(f"\n TESTING PARAMETER: Learning Rate = {lr}")
         
-        #replace dots with underscores for safe filenames, den prepei na exei teleia mesa to onoma tou arxeiou
+
         lr_str = str(lr).replace('.', '_')
         model_filename = f"ppo_hev_lr_{lr_str}"
-        #plhres monopati, opws to zhtame, to join enwnei ta monopatia afta
+
         save_path_request = os.path.join(MODELS_DIR, model_filename)
         
-        #Training
+
         print(f"Training:")
         train_ppo(steps=20000, lr=lr, save_path=save_path_request, traffic='normal')
         
         time.sleep(1) #na anasanei to systhma an xreiastoun polla training
 
-        # Evresh tou arxeiou
+
         print("Evaluating:")
         
-        #H vivliothiki mporei na to exei swsei me 2 tropous
+
         possible_files = [
             save_path_request + ".zip",  #Prwta .zip
             save_path_request            #An den yparxei, psakse to sketo
@@ -54,10 +54,10 @@ def run_grid_search():
         if source_path:#an vrei kapoio arxeio to montelo
             print(f"[Debug] Found model file at: {source_path}")
             try:
-                #ola ta ekpaidevmena montela na paroun to onoma pou theloume
+
                 shutil.copy(source_path, target_path)
                 
-                #fortwnei to montelo ppo_hev.zip trexei to hev simulation, metraei posa litra ekapse
+
                 fuel_consumed = run_simulation(mode='baseline')
                 
                 if fuel_consumed is not None:
@@ -84,7 +84,7 @@ def run_grid_search():
 
     df_results = pd.DataFrame(results)
     
-    #Sorting
+
     try:
         df_results = df_results.sort_values(by="Fuel Consumption (L)", ascending=True)#dataframe pou exei oles tis dokimes tou grid search, h mikroterh katanalwsh mpainei prwth
         print(df_results)

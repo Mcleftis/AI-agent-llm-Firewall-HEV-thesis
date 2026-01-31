@@ -7,10 +7,10 @@ from flask_cors import CORS
 from datetime import datetime
 from db_logger import log_telemetry
 
-# Prosthetoume ton "gonea" fakelo sto path gia na vroume to full_system.py
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# --- 1. IMPORT TO AI MODULE (LLAMA 3) ---
+
 try:
     from full_system import get_driver_intent
     AI_AVAILABLE = True
@@ -18,7 +18,7 @@ except ImportError:
     print("⚠️ Warning: full_system.py not found. Using Mock AI.")
     AI_AVAILABLE = False
 
-# --- 2. IMPORT TO RUST FIREWALL (SAFETY LAYER) ---
+
 try:
     import rust_can_firewall 
     RUST_AVAILABLE = True
@@ -29,16 +29,16 @@ except ImportError:
 app = Flask(__name__)
 CORS(app)
 
-# Vasiko URL (Prepei na tairiazei me to openapi.yaml)
+
 BASE_URL = '/api/v1'
 
-# --- SECURITY CONFIGURATION (IAM & SRA) ---
+
 API_SECRET_TOKEN = "super-secret-key-2025"
 
-# --- ENDPOINT 1: AI CONTROL & SAFETY CHECK (POST) ---
+
 @app.route(f'{BASE_URL}/control/intent', methods=['POST'])
 def analyze_intent():
-    # --- VIMA 0: IDENTITY & ACCESS MANAGEMENT (SRA / ZTNA) ---
+
     user_token = request.headers.get('X-Auth-Token')
     
     if user_token != API_SECRET_TOKEN:
@@ -49,7 +49,7 @@ def analyze_intent():
     raw_command = data.get('command', '') 
     print(f"🧠 AI Request Received: '{raw_command}'")
     
-    # --- VIMA A: ELEGXOS ASFALEIAS ME RUST (ACTIVE SAFETY) 🛡️ ---
+
     if RUST_AVAILABLE:
         safe_command = rust_can_firewall.sanitize_command(raw_command)
         
@@ -61,7 +61,7 @@ def analyze_intent():
                 "original_command": raw_command
             }), 403
 
-    # --- VIMA B: AI PROCESSING ---
+
     if AI_AVAILABLE:
         try:
             start_time = time.time()
@@ -85,7 +85,7 @@ def analyze_intent():
     return jsonify(result)
 
 
-# --- ENDPOINT 2: VEHICLE TELEMETRY (GET) ---
+
 @app.route(f'{BASE_URL}/vehicle/telemetry', methods=['GET'])
 def get_telemetry():
     current_speed = round(random.uniform(50, 120), 1)
@@ -106,7 +106,7 @@ def get_telemetry():
     })
 
 
-# --- ENDPOINT 3: SECURITY STATUS (GET) ---
+
 @app.route(f'{BASE_URL}/security/status', methods=['GET'])
 def get_security_status():
     blocked_count = 0
@@ -138,13 +138,13 @@ def get_security_status():
         "current_threat_level": threat_level
     })
 
-# --- MAIN BLOCK: TLS/SSL CONFIGURATION ---
+
 if __name__ == '__main__':
-    # Ορίζουμε τα paths για τα πιστοποιητικά
+
     cert_file = os.path.join('certs', 'cert.pem')
     key_file = os.path.join('certs', 'key.pem')
 
-    # Ελέγχουμε αν υπάρχουν τα αρχεία
+
     if os.path.exists(cert_file) and os.path.exists(key_file):
         ssl_context = (cert_file, key_file)
         
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         print(f"🔒 Certificates loaded from: {cert_file}")
         print("="*50 + "\n")
         
-        # Ενεργοποιούμε το SSL Context
+
         app.run(host='0.0.0.0', port=5000, debug=True, ssl_context=ssl_context)
     else:
         print("\n" + "!"*50)

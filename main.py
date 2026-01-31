@@ -3,11 +3,11 @@ import logging
 import sys
 import os
 
-#profiling.py
+
 try:
     from profiling import measure_performance
 except ImportError:
-    #an leeipei to profiling.py, trekse to sketo
+
     def measure_performance(func): return func
 
 logging.basicConfig(#emfanizontai INFO, WARNING, ERROR, CRITICAL
@@ -20,7 +20,7 @@ logging.basicConfig(#emfanizontai INFO, WARNING, ERROR, CRITICAL
 def main():
     parser = argparse.ArgumentParser(description="Neuro-Symbolic HEV Control System CLI")#emfanizetai an pathsoume python main.py --help
     
-    # Modes
+
     parser.add_argument(
         '--mode',#kaleitai me python main.py --mode train 
         type=str, 
@@ -29,7 +29,7 @@ def main():
         help='Select operation mode'
     )
 
-    # Parameters
+
     parser.add_argument('--steps', type=int, default=100000, help='Training steps')#posa timesteps tha ekpaideftei o PPO Agent,an den dwseis int tha exoume 100000
     parser.add_argument('--lr', type=float, default=0.0003, help='Learning rate')
     parser.add_argument('--traffic', type=str, default='normal', choices=['low', 'normal', 'heavy'])# px mporoume an to kalesoume me python main.py --mode train --traffic heavy
@@ -41,7 +41,7 @@ def main():
 
     logging.info(f"Starting System in [{args.mode.upper()}] mode")#ta kanoume k kefalaia na einai efdiakrita
     
-    #ektelesh me profiling
+
     try:
         from AI_agent import train_ppo             # Train Mode
         from full_system import run_live_system    # Demo Mode

@@ -16,7 +16,7 @@ def run_script(path_parts):
 
     print(f"Running: {path_parts[-1]}...")
     try:
-        # Τρέχουμε την Python στο συγκεκριμένο αρχείο
+
         subprocess.run([sys.executable, script_path], check=True)
     except KeyboardInterrupt:
         print("\nStopped by user.")
@@ -35,23 +35,23 @@ def main():
     command = sys.argv[1]
 
     if command == "init":
-        # Τρέχει το api/init_db.py
+
         run_script(["api", "init_db.py"])
         
     elif command == "run":
-        # Τρέχει το api/server.py
+
         run_script(["api", "server.py"])
         
     elif command == "sim":
-        # Τρέχει το main.py (ή το full_system.py αν δεν έχεις main)
-        # Θα δοκιμάσουμε πρώτα το main.py
+
+
         if os.path.exists(os.path.join(BASE_DIR, "main.py")):
             run_script(["main.py"])
         else:
             run_script(["full_system.py"])
 
     elif command == "test":
-        # Τρέχει το test_db.py που φτιάξαμε πριν
+
         run_script(["test_db.py"])
         
     else:

@@ -8,5 +8,5 @@ name = "rust_can_firewall"
 crate-type = ["cdylib"]
 
 [dependencies]
-# Κλειδώνουμε την έκδοση για να μην έχουμε εκπλήξεις
+
 pyo3 = { version = "0.21.0", features = ["extension-module"] }

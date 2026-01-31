@@ -5,16 +5,16 @@ import time
 import os
 import sys
 
-#dhmiourgia tou site
+
 
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))#exoume to path tou arxeiou, ginetai apolyto, me to dirname pairnoume ton fakelo pou to periexei, prosthetei afton ton fakelo ekei pou h python psaxnei modules
 from full_system import get_driver_intent
 
-#set-up selidas
+
 st.set_page_config(page_title="Hybrid AI System Control", page_icon="🧠", layout="wide")#rythmizei thn emfanizh ths selidas, me layout=wide aplwnetai se olo to platos ths selidas
 
-#data loading
+
 @st.cache_data#krataei to apotelesma ths mnhmhs sth cache, gia na mhn allazei kathe fora pou kanoume allagh
 def get_dataset():
     base_dir = os.path.dirname(os.path.abspath(__file__))#pou vrisketai to trexon arxeio
@@ -31,7 +31,7 @@ def get_dataset():
                 if col in df.columns: df[col] = df[col].fillna(0)#gemizei me mhdenika ta kena
             return df, "✅ System Ready"
             
-    # Mock Data Fallback
+
     dummy_df = pd.DataFrame({
         "Speed (km/h)": np.random.uniform(0, 120, 100),#100 tyxaioi arithmoi apo 0 ews 120
         "Engine Power (kW)": np.random.uniform(0, 50, 100),
@@ -41,24 +41,24 @@ def get_dataset():
 
 df, status_msg = get_dataset()#afta ta dyo kanei return h get_dataset
 
-#UI Header
+
 st.title("🧠 True Semantic AI Control")
 st.markdown("### Powered by OpenAI Logic & Llama 3")#sxolio apo katw
 if "Demo" in status_msg: st.warning(status_msg)#an yparxei to demo sto status_msg, exoume kitrino warning box sto streamlit UI
 else: st.success(status_msg)#alliws ola fortwsan kanonika
 
-#Sidebar/AI-input
+
 st.sidebar.header("🗣️ Talk to the Car")#ti leei plagia h epikefalida
 user_input = st.sidebar.text_input("Command:", placeholder="e.g. 'Οδήγα σαν τον παππού μου' or 'McRae style'")#koutaki pou dexetai ti tha grapsoume, kai mesa exei me thola afto to mhnyma
 
-#AI proccessing logic
+
 if 'mode' not in st.session_state:#to programma kathe fora pou allazei o xrhsths kati, trexxei ksana, px ana allaksei slider, an allaksei input, monimh mnhmh mexri o xrhsths na allaksei th synedria
     st.session_state['mode'] = "WAITING..."
     st.session_state['aggr'] = 0.5#afta ta dyo einai ta αrxika state an o xrhsths den exei dwsei kati
 
 if st.sidebar.button("🧠 Analyze Intent"):#an o xrhsths pathsei to analyze_intent
     with st.spinner("AI is thinking (Llama 3)..."):#molis to pathsoume
-        #kaloume ton egkefalo(oxi fake logic)
+
         try:
             result = get_driver_intent(forced_prompt=user_input)#pairnei to prompt tou odhgou
             st.session_state['mode'] = result['mode']
@@ -66,17 +66,17 @@ if st.sidebar.button("🧠 Analyze Intent"):#an o xrhsths pathsei to analyze_int
         except Exception as e:
             st.error(f"AI Error: {e}")
 
-# Display Results
+
 mode = st.session_state['mode']
 aggressiveness = st.session_state['aggr']
 
-#Dahboard KPIs
+
 k1, k2, k3 = st.columns(3)#treis ises sthles gia na valeis ta KPIs didpla dipla
 k1.metric("AI Detected Mode", mode)#omorfo kouti typou kpi
 k2.metric("Aggressiveness", f"{aggressiveness*100:.0f}%")#xwris dekadika
 k3.metric("System Status", "ONLINE")
 
-#Animation
+
 st.divider()#orizontia grammh sto UI, spaei th selida
 st.subheader("📡 Live Telemetry")
 col1, col2 = st.columns(2)#xwrizei to section se 2 sthles

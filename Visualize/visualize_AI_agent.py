@@ -58,7 +58,7 @@ class ProfessionalHybridEnv(gym.Env):
         
         return self._get_obs(), 0, terminated, False, {"fuel": fuel_consumption, "soc": self.soc}
 
-#Graphs
+
 if __name__ == "__main__":
     df = pd.read_csv(DATA_FILENAME)
     df.columns = df.columns.str.strip()
@@ -68,14 +68,14 @@ if __name__ == "__main__":
     
     model = PPO.load(MODEL_PATH)
     
-    #Lists for saving data of graphs
+
     history_ai_fuel = []
     history_dumb_fuel = []
     history_ai_soc = []
     
     steps = 1000
     
-    #AI RUN
+
     obs, _ = env_ai.reset()
     cum_fuel = 0
     for _ in range(steps):
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         history_ai_soc.append(info['soc'])
         if done: break
         
-    #DUMB RUN
+
     obs, _ = env_dumb.reset()
     cum_fuel = 0
     for _ in range(steps):
@@ -96,10 +96,10 @@ if __name__ == "__main__":
         history_dumb_fuel.append(cum_fuel)
         if done: break
 
-    #PLOTTING
+
     plt.figure(figsize=(12, 6))
     
-    #Consumption
+
     plt.subplot(1, 2, 1)
     plt.plot(history_dumb_fuel, label='Conventional (Dumb)', color='red', linestyle='--')
     plt.plot(history_ai_fuel, label='AI Agent (PPO)', color='green', linewidth=2)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.grid(True)
     
-    #Battery Graph:(SOC)
+
     plt.subplot(1, 2, 2)
     plt.plot(history_ai_soc, label='AI Battery SOC', color='blue')
     plt.title('AI Battery Strategy (SOC)')
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     plt.grid(True)
     
     plt.tight_layout()
-    #docker
+
     plt.savefig("visualize_AI_agent.png") 
     print("Graph saved to visualize1_result.png")
     plt.close() #katharismos mnhmhs

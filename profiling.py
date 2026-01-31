@@ -4,7 +4,7 @@ import logging
 import psutil
 import os
 
-#mas deixnei to performance
+
 
 logging.basicConfig(
     filename='system_performance.log', #pou tha grfaontai ta logs
@@ -18,7 +18,7 @@ def measure_performance(func):
      
         process = psutil.Process(os.getpid())#pairneis to procces, to python script kai me afto metras RAM,CPU
         
-        #metrhseis prin
+
         mem_before = process.memory_info().rss / 1024 / 1024  #MB prin treksei h synarthsh
         process.cpu_percent(interval=None) #Καθαρισμός του counter
         start_time = time.time()
@@ -27,12 +27,12 @@ def measure_performance(func):
         result = func(*args, **kwargs)#trexei h pragmatikh synarthsh pou metraw
        
         
-        #metrhseis meta
+
         end_time = time.time()#pote teleiwse
         mem_after = process.memory_info().rss / 1024 / 1024  # MB
         cpu_usage = process.cpu_percent(interval=None)
         
-        #ypologismoi
+
         execution_time = (end_time - start_time) * 1000 # ms
         mem_diff = mem_after - mem_before
         
@@ -42,7 +42,7 @@ def measure_performance(func):
         print(f"RAM:  {mem_after:.2f} MB ({mem_diff:+.2f} MB)")
         print(f"CPU:  {cpu_usage:.1f}%") 
         
-        #Logging
+
         logging.info(f"METRICS,{func.__name__},Time={execution_time:.2f}ms,RAM={mem_after:.2f}MB,CPU={cpu_usage:.1f}%")
         
         return result

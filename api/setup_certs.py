@@ -6,11 +6,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 import datetime
 
-# Ορίζουμε το όνομα του φακέλου
+
 CERT_DIR = "certs"
 
 def generate_self_signed_cert():
-    # Δημιουργία φακέλου αν δεν υπάρχει
+
     if not os.path.exists(CERT_DIR):
         print(f"📂 Creating folder: {CERT_DIR}...")
         os.makedirs(CERT_DIR)
@@ -47,7 +47,7 @@ def generate_self_signed_cert():
         critical=False,
     ).sign(key, hashes.SHA256())
 
-    # Αποθήκευση ΜΕΣΑ στον φάκελο certs
+
     key_path = os.path.join(CERT_DIR, "key.pem")
     cert_path = os.path.join(CERT_DIR, "cert.pem")
 

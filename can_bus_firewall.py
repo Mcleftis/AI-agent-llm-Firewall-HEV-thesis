@@ -4,24 +4,24 @@ from typing import List, Dict, Optional
 import os  
 from dotenv import load_dotenv 
 
-#fortwsh apo to .env
+
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')#pws fainetai to logging
 
 class CANBusFirewall:
-    #type-hinting
+
     def __init__(self, max_delta: float = 10.0, max_packets: int = 50) -> None:#den epistrefei kati
         self.allowed_ids: List[int] = [0x100, 0x200, 0x300, 0x400]#lista apo integers
         self.last_values: Dict[int, float] = {} #ti hrthe teleftaio
         self.packet_timestamps: List[float] = []#ti wra hrthe
         self.blocked_ids: List[int] = []
        
-        #pairnw ttis times pou edwse o xrhsths ston constructor
+
         self.max_delta: float = max_delta
         self.max_packets_per_sec: int = max_packets
        
-        #asfaleia, diavazoume apo to env
+
         self.auth_token: str = os.getenv("CAN_AUTH_TOKEN", "INVALID_TOKEN_FALLBACK")
 
     def verify_token(self, input_token: str) -> bool: #epistrefei boolean
@@ -42,7 +42,7 @@ class CANBusFirewall:
             logging.warning(f"SECURITY ALERT: Unknown ID {packet_id}")
             return False 
         
-        #Type Hinting pali
+
         self.packet_timestamps = [t for t in self.packet_timestamps if current_time - t < 1.0]#krata ta timestamps pou hrthan sto teleftaio sec
         self.packet_timestamps.append(current_time)#apo twra h lista exei kai to neo paketo
         

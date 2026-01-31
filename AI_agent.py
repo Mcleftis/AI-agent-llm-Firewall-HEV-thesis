@@ -18,12 +18,12 @@ class ProfessionalHybridEnv(gym.Env):
         self.current_step = 0 #prwto row tou dataset
         self.soc = 60.0 #arxikh mpataria
 
-        # Observation Space ti vlepei to AI
+
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(4,), dtype=np.float32 #den exoun oria oi times, pannta tha mou dineis 4 times, to gym prepei na kserei ton typo twn parathrhsewn
         )
 
-        # Action Space (Continuous: 0.0 to 1.0)
+
         self.action_space = spaces.Box(low=0.0, high=1.0, shape=(1,), dtype=np.float32)# to AI apofasizei poso hlektriko kai poso mhxanikoinhto 
 
     def reset(self, seed=None, options=None):#ksekina neo episodio
@@ -35,7 +35,7 @@ class ProfessionalHybridEnv(gym.Env):
     def _get_obs(self):#pairnei ton pinaka me tous 4 arithmous kai to dinei sto AI ws parathrhsh
         row = self.df.iloc[self.current_step]#fere mou th grammh pou antistoixei sto tade vhma
         
-        # SAFE READ
+
         eng_pwr = row.get('Engine Power (kW)', 0)
         reg_pwr = row.get('Regenerative Braking Power (kW)', 0)
         power_demand = eng_pwr - reg_pwr
@@ -53,7 +53,7 @@ class ProfessionalHybridEnv(gym.Env):
         u_engine = float(action[0])#poso mhxanh thelw na xrhsimopoihsw
         row = self.df.iloc[self.current_step]#dedomena ths trexousas stigmhs
         
-        #synthikes gia mpataria(prostethike meta)
+
         if self.temperature < 10:
             temp_factor = 1.2  #Kryo:H mpataria zorizetai
         elif self.temperature > 30:
@@ -69,7 +69,7 @@ class ProfessionalHybridEnv(gym.Env):
         battery_power = 0.0
         fuel_consumption = 0.0
         
-        #periptwseis
+
         if power_demand <= 0:
             battery_power = power_demand
             self.soc -= (battery_power * 0.001 * (1.0 / temp_factor))
@@ -104,7 +104,7 @@ def train_ppo(steps=200000, lr=0.0003, save_path="models/ppo_hev", traffic='norm
     print(f"\nStarting Training Session:")
     print(f"Configuration -> Steps: {steps}, LR: {lr}")
     
-    #Loading data
+
     if not os.path.exists(DATA_FILENAME):
         print(f"Error: Cannot find file {DATA_FILENAME}")
         return
@@ -116,33 +116,33 @@ def train_ppo(steps=200000, lr=0.0003, save_path="models/ppo_hev", traffic='norm
     if 'Regenerative Braking Power (kW)' not in df.columns:
          df['Regenerative Braking Power (kW)'] = 0.0
 
-    #Creating environment wrapped in DummyVecEnv (gia Normalization)
+
     env = DummyVecEnv([lambda: ProfessionalHybridEnv(df)])
     
-    #NORMALIZATION
-    #ekshsorrophsh noumerwn gia na mathainei to AI pio grhgora
+
+
     env = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=10.)
 
-    #save path
+
     if not os.path.exists(os.path.dirname(save_path)):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    #Training
+
     print("Initializing PPO Agent with Normalization...")
     model = PPO("MlpPolicy", env, verbose=1, learning_rate=lr)
     
     print("Training started...")
     model.learn(total_timesteps=steps)
     
-    #Save Model AND Normalization Stats
-    #aparaithto to save gia na ta kseroume meta 
+
+
     model.save(save_path)
     env.save(f"{save_path}_vecnormalize.pkl")
     
     print(f"Training Completed! Model saved at: {save_path}")
 
 
-# Running on its own
+
 if __name__ == "__main__":
-    #Run with default settings if it is runned directly
+
     train_ppo()

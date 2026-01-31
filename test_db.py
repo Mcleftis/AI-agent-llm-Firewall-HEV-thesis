@@ -3,7 +3,7 @@ import sys
 import sqlite3
 import time
 
-# Ρύθμιση για να βλέπει τον φάκελο 'api'
+
 sys.path.append(os.path.join(os.path.dirname(__file__), 'api'))
 
 try:
@@ -15,17 +15,17 @@ except ImportError:
 print("🔍 --- DIAGNOSTIC TEST START ---")
 print(f"📂 Database Path detected: {DB_PATH}")
 
-# 1. Έλεγχος αν υπάρχει το αρχείο
+
 if not os.path.exists(DB_PATH):
     print("❌ CRITICAL: Το αρχείο .db δεν υπάρχει! Τρέξε 'python manage.py init'")
     sys.exit(1)
 else:
     print("✅ File check passed: Η βάση υπάρχει.")
 
-# 2. Δοκιμή Εγγραφής (WRITE TEST)
+
 print("\n✍️  Testing WRITE operation...")
 try:
-    # Γράφουμε μια ψεύτικη εγγραφή με πηγή "TEST_SCRIPT"
+
     test_speed = 999.9
     test_battery = 12.3
     log_telemetry(test_speed, test_battery, 50.0, source="TEST_SCRIPT")
@@ -34,13 +34,13 @@ except Exception as e:
     print(f"❌ Write Failed: {e}")
     sys.exit(1)
 
-# 3. Δοκιμή Ανάγνωσης (READ TEST)
+
 print("\n👓 Testing READ operation...")
 try:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Ζητάμε την εγγραφή που μόλις βάλαμε
+
     cursor.execute("SELECT * FROM telemetry WHERE log_source = 'TEST_SCRIPT' ORDER BY id DESC LIMIT 1")
     row = cursor.fetchone()
     

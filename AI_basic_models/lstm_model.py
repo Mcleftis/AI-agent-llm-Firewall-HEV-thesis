@@ -22,14 +22,14 @@ TIME_STEPS = 60
 
 X_scaled, y_scaled, scaler_y=get_data_ready(DATA_PATH)
 
-#sequence creation
+
 X_seq, y_seq=create_sequences(X_scaled, y_scaled, TIME_STEPS)
 print(f"Σχήμα Δεδομένων(Data Shape): {X_seq.shape}")
 
-#training
+
 X_train, X_test, y_train, y_test = train_test_split(X_seq, y_seq, test_size=0.2, shuffle=True, random_state=42)
 
-#lstm
+
 model = Sequential([
     LSTM(32, input_shape=(X_train.shape[1], X_train.shape[2]), return_sequences=False),
     Dropout(0.2), 

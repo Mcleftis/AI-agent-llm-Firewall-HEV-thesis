@@ -4,7 +4,7 @@ from gymnasium import spaces
 import numpy as np
 from stable_baselines3 import PPO
 
-#sygkrinoume me xazo odhgo ton AI_agent
+
 
 DATA_FILENAME = "data/my_working_dataset.csv"
 MODEL_PATH = "final_hybrid_agent_model"
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     df = pd.read_csv(DATA_FILENAME)
     df.columns = df.columns.str.strip() 
     
-    #Creating two identical environments
+
     env_ai = ProfessionalHybridEnv(df)
     env_dumb = ProfessionalHybridEnv(df) #Xazos odhgos mono venzinh
     
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     
     steps_to_test = 1000
     
-    #Running AI
+
     obs, _ = env_ai.reset()
     fuel_ai = 0
     for _ in range(steps_to_test):
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         fuel_ai += info['fuel']
         if done: break
         
-    #Only Fuel
+
     obs, _ = env_dumb.reset()
     fuel_dumb = 0
     for _ in range(steps_to_test):

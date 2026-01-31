@@ -25,7 +25,7 @@ engine_power = np.where(total_power_demand > 0, total_power_demand, 0)
 
 regen_power = np.where(total_power_demand < 0, -total_power_demand * 0.7, 0)
 
-#Random consumption, AI will calculate it eventually
+
 fuel_consumption = (engine_power * 0.1) + np.random.normal(0, 0.01, n_samples)
 fuel_consumption = np.maximum(fuel_consumption, 0.2) 
 

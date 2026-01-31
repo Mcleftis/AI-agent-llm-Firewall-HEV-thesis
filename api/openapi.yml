@@ -23,7 +23,7 @@ tags:
     description: Rust IDS & Firewall Reporting
 
 paths:
-  # --- 1. ΤΟ ΜΥΑΛΟ (AI Agent) ---
+
   /control/intent:
     post:
       tags:
@@ -54,7 +54,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AIResponse'
 
-  # --- 2. ΤΑ ΔΕΔΟΜΕΝΑ (Data/CSV) ---
+
   /vehicle/telemetry:
     get:
       tags:
@@ -71,7 +71,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TelemetryData'
 
-  # --- 3. Η ΑΣΦΑΛΕΙΑ (Rust Firewall) ---
+
   /security/status:
     get:
       tags:

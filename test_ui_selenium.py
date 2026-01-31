@@ -4,7 +4,7 @@ import requests
 class TestHevApp(unittest.TestCase):
     
     def setUp(self):
-        # Αυτό είναι το URL του app.py που φτιάξαμε μόλις
+
         self.base_url = "http://127.0.0.1:5000/api/v1"
 
     def test_health_check(self):
@@ -38,7 +38,7 @@ class TestHevApp(unittest.TestCase):
             print(f"  -> Input: '{payload['command']}'")
             print(f"  -> Result Mode: {analysis.get('mode')}")
             
-            # Ελέγχουμε αν το LLM κατάλαβε ότι βιαζόμαστε (SPORT)
+
             self.assertEqual(analysis.get('mode'), "SPORT")
             
         except requests.exceptions.ConnectionError:

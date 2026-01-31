@@ -17,11 +17,11 @@ def log_telemetry(speed: float, battery: float, temp: float, source: str = "API"
         source (str): Από πού ήρθε η εγγραφή (π.χ. 'API', 'Simulation')
     """
     try:
-        #syndesh se vash
+
         with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             
-            #trexousa wra se iso format
+
             timestamp = datetime.datetime.now().isoformat()
             
           

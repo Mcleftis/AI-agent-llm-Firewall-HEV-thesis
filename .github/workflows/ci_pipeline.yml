@@ -1,6 +1,6 @@
 name: Hybrid AI System CI
 
-# Πότε τρέχει: Κάθε φορά που κάνεις Push στον κώδικα
+
 on: [push]
 
 jobs:
@@ -8,22 +8,22 @@ jobs:
     runs-on: ubuntu-latest  # Τρέχει σε εικονικό υπολογιστή Linux της GitHub
 
     steps:
-    # 1. Κατεβάζει τον κώδικά σου
+
     - uses: actions/checkout@v2
 
-    # 2. Εγκαθιστά Python 3.9
+
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
 
-    # 3. Εγκαθιστά τις βιβλιοθήκες που χρειάζεσαι
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pandas numpy gymnasium stable-baselines3 ollama pytest
 
-    # 4. Τρέχει τα Unit Tests που έφτιαξες!
+
     - name: Run Test All
       run: |
         python test_all.py
