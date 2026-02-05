@@ -1,21 +1,31 @@
+# --- Python Basics ---
 __pycache__/
 *.pyc
-*.zip
-*.log
+*.pyo
+*.pyd
+
+# --- Virtual Environment ---
 env/
 venv/
-.DS_Store
-.vscode/
+.pytest_cache/
 
+# --- Secrets & Environment Variables (ΤΟ ΠΙΟ ΣΗΜΑΝΤΙΚΟ) ---
 .env
 *.env
 
-
-.env
+# --- Certificates & Keys ---
 api/certs/
 *.pem
 *.key
 
+# --- External Tools & Binaries (Δεν τα θέλουμε στο GitHub) ---
+cloudflared.exe
+sqlmap-dev/
+*.exe
+*.zip
 
-__pycache__/
-*.pyc
+# --- Logs & OS Junk ---
+*.log
+.DS_Store
+.vscode/
+.idea/

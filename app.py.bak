@@ -3,15 +3,13 @@ import pandas as pd
 import numpy as np
 import time
 import os
-from dotenv import load_dotenv
-load_dotenv()
 import requests
 import urllib3
 import json
 
 # Ρυθμίσεις Σύνδεσης με τον Server
 API_URL = "https://127.0.0.1:5000/api/v1"
-API_TOKEN = os.getenv("User_API_TOKEN")
+API_TOKEN = "super-secret-key-2025"
 
 # Απενεργοποίηση warnings SSL
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -51,7 +49,7 @@ st.markdown("### Powered by Flask API & Streamlit")
 # Έλεγχος Server
 server_status = "🔴 OFFLINE"
 try:
-    test = requests.get(f"{API_URL}/vehicle/telemetry", verify=False # nosec, timeout=2)
+    test = requests.get(f"{API_URL}/vehicle/telemetry", verify=False, timeout=2)
     if test.status_code == 200:
         server_status = "🟢 ONLINE (Connected via HTTPS)"
 except:
@@ -87,7 +85,7 @@ if st.sidebar.button("🧠 Analyze Intent"):
                     f"{API_URL}/control/intent", 
                     json=payload, 
                     headers=headers, 
-                    verify=False # nosec,
+                    verify=False,
                     timeout=1000  # <--- ΠΡΟΣΘΕΣΕ ΑΥΤΟ ΕΔΩ! (Περιμένει μέχρι 1 λεπτό)
                 )
                 
